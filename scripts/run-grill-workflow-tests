@@ -1,0 +1,55 @@
+#!/usr/bin/env python3
+"""Run grill workflow validator fixtures.
+
+Conventions:
+- pass-*.json fixtures must pass validation (exit 0)
+- fail-*.json fixtures must fail validation (exit non-zero)
+"""
+
+from __future__ import annotations
+
+import subprocess
+import sys
+from pathlib import Path
+
+
+def main() -> int:
+    repo_root = Path(__file__).resolve().parent.parent
+    validator = repo_root / "scripts" / "validate-grill-workflow"
+    fixtures_dir = repo_root / ".agents" / "skills" / "examples" / "grill-workflow-tests"
+
+    fixtures = sorted(fixtures_dir.glob("*.json"))
+    if not fixtures:
+        print("No fixtures found")
+        return 2
+
+    failures: list[str] = []
+    for fixture in fixtures:
+        expected_pass = fixture.name.startswith("pass-")
+        expected_fail = fixture.name.startswith("fail-")
+        if not (expected_pass or expected_fail):
+            failures.append(f"{fixture.name}: invalid naming (use pass- or fail- prefix)")
+            continue
+
+        result = subprocess.run([str(validator), str(fixture)], capture_output=True, text=True)
+        passed = result.returncode == 0
+
+        if expected_pass and not passed:
+            failures.append(f"{fixture.name}: expected PASS, got FAIL\n{result.stdout}{result.stderr}")
+        elif expected_fail and passed:
+            failures.append(f"{fixture.name}: expected FAIL, got PASS\n{result.stdout}{result.stderr}")
+        else:
+            print(f"ok - {fixture.name}")
+
+    if failures:
+        print("\nTest failures:")
+        for failure in failures:
+            print(f"- {failure}")
+        return 1
+
+    print(f"\nAll grill workflow tests passed ({len(fixtures)} fixtures)")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

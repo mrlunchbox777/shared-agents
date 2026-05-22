@@ -1,5 +1,7 @@
 # shared-agents
 
+[![Grill Workflow Tests](https://github.com/mrlunchbox777/shared-agents/actions/workflows/grill-workflow-tests.yaml/badge.svg)](https://github.com/mrlunchbox777/shared-agents/actions/workflows/grill-workflow-tests.yaml)
+
 Shared AGENTS.md configuration, instruction scaffolding, and reusable skills for multiple projects.
 
 ## Structure

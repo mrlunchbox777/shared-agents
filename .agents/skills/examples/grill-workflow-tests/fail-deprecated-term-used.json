@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0.0",
+  "status": "ready",
+  "language_updates": {
+    "context_doc_path": "CONTEXT.md",
+    "added": [],
+    "changed": [],
+    "deprecated": [
+      {
+        "term": "Legacy Pitch",
+        "definition": "Deprecated term replaced by Pitch"
+      }
+    ]
+  },
+  "adr_candidates": [],
+  "readiness_gate": {
+    "core_terms_reconciled": true,
+    "open_decisions": [],
+    "adr_state": "none_required",
+    "implementation_slice_bounded": true
+  },
+  "issue_inputs": [
+    {
+      "issue_id": "IMPL-001",
+      "title": "Update pitch list",
+      "problem_statement": "Remove Legacy Pitch references in API response",
+      "scope_in": ["Rename returned fields"],
+      "scope_out": [],
+      "acceptance_criteria": ["No legacy label in UI"],
+      "dependencies": [],
+      "blocked_by": [],
+      "risks": [],
+      "docs_to_update": ["CONTEXT.md"],
+      "test_notes": ["Add API response test"],
+      "kind": "implementation"
+    }
+  ],
+  "architecture_followups": {
+    "review_doc_path": "ARCHITECTURE_REVIEW.md",
+    "cadence": "weekly",
+    "items": []
+  },
+  "allow_deprecated_terms_for_migration": false
+}

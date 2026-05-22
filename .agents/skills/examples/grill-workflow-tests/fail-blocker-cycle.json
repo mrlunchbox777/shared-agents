@@ -1,0 +1,53 @@
+{
+  "schema_version": "1.0.0",
+  "status": "ready",
+  "language_updates": {
+    "context_doc_path": "CONTEXT.md",
+    "added": [],
+    "changed": [],
+    "deprecated": []
+  },
+  "adr_candidates": [],
+  "readiness_gate": {
+    "core_terms_reconciled": true,
+    "open_decisions": [],
+    "adr_state": "none_required",
+    "implementation_slice_bounded": true
+  },
+  "issue_inputs": [
+    {
+      "issue_id": "ADR-001",
+      "title": "ADR A",
+      "problem_statement": "First decision",
+      "scope_in": [],
+      "scope_out": [],
+      "acceptance_criteria": ["ADR drafted"],
+      "dependencies": [],
+      "blocked_by": ["ADR-002"],
+      "risks": [],
+      "docs_to_update": ["CONTEXT.md"],
+      "test_notes": ["Docs only"],
+      "kind": "adr"
+    },
+    {
+      "issue_id": "ADR-002",
+      "title": "ADR B",
+      "problem_statement": "Second decision",
+      "scope_in": [],
+      "scope_out": [],
+      "acceptance_criteria": ["ADR drafted"],
+      "dependencies": [],
+      "blocked_by": ["ADR-001"],
+      "risks": [],
+      "docs_to_update": ["CONTEXT.md"],
+      "test_notes": ["Docs only"],
+      "kind": "adr"
+    }
+  ],
+  "architecture_followups": {
+    "review_doc_path": "ARCHITECTURE_REVIEW.md",
+    "cadence": "weekly",
+    "items": []
+  },
+  "allow_deprecated_terms_for_migration": false
+}

@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0.0",
+  "status": "needs changes",
+  "language_updates": {
+    "context_doc_path": "CONTEXT.md",
+    "added": [],
+    "changed": [],
+    "deprecated": []
+  },
+  "adr_candidates": [],
+  "readiness_gate": {
+    "core_terms_reconciled": false,
+    "open_decisions": [],
+    "adr_state": "none_required",
+    "implementation_slice_bounded": false
+  },
+  "issue_inputs": [],
+  "architecture_followups": {
+    "review_doc_path": "ARCHITECTURE_REVIEW.md",
+    "cadence": "weekly",
+    "items": []
+  },
+  "allow_deprecated_terms_for_migration": false
+}

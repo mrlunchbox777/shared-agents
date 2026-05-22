@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0.0",
+  "status": "ready",
+  "language_updates": {
+    "context_doc_path": "CONTEXT.md",
+    "added": [],
+    "changed": [],
+    "deprecated": []
+  },
+  "adr_candidates": [],
+  "readiness_gate": {
+    "core_terms_reconciled": true,
+    "open_decisions": [],
+    "adr_state": "none_required",
+    "implementation_slice_bounded": true
+  },
+  "issue_inputs": [
+    {
+      "issue_id": "IMPL-001",
+      "title": "Implement pitch list",
+      "problem_statement": "Need UI list",
+      "scope_in": ["Pitch list page"],
+      "scope_out": [],
+      "acceptance_criteria": ["Page renders"],
+      "dependencies": [],
+      "blocked_by": ["ADR-404"],
+      "risks": [],
+      "docs_to_update": ["CONTEXT.md"],
+      "test_notes": ["Add UI tests"],
+      "kind": "implementation"
+    }
+  ],
+  "architecture_followups": {
+    "review_doc_path": "ARCHITECTURE_REVIEW.md",
+    "cadence": "weekly",
+    "items": []
+  },
+  "allow_deprecated_terms_for_migration": false
+}

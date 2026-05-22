@@ -21,9 +21,10 @@ These are cross-project defaults for agents consuming this shared repository.
 
 - Use skills from `.agents/skills/` when they directly match the task.
 - If no skill applies, follow repository and project instructions.
-- When crafting a plan or asking to execute a plan, if the user did not already request grilling, ask whether they want to use `grill-me` and recommend yes.
+- When grilling is requested for a codebase, prefer `grill-with-docs` by default.
+- Use `grill-me` only when the user explicitly asks for `grill-me`.
 - Preferred docs-first flow when a codebase exists:
-  1. `grill-me` (or grill-with-docs style) first to pressure-test scope and decisions.
+  1. `grill-with-docs` first to pressure-test scope and decisions.
   2. `ubiquitous-language` to reconcile terms and update `CONTEXT.md` with terminology deltas.
   3. `adr-writer` for strict-threshold, non-obvious decisions.
   4. `to-issues` only after readiness status is `ready`.

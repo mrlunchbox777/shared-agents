@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0.0",
+  "status": "ready",
+  "language_updates": {
+    "context_doc_path": "CONTEXT.md",
+    "added": [
+      {
+        "term": "Pitch",
+        "definition": "A packaging artifact around one or more standalone videos."
+      },
+      {
+        "term": "Pitched Standalone Video",
+        "definition": "A standalone video whose pitchId is non-null."
+      }
+    ],
+    "changed": [
+      {
+        "term": "Standalone Video",
+        "definition": "A video with lessonId IS NULL. Pitch association is orthogonal metadata."
+      }
+    ],
+    "deprecated": []
+  },
+  "adr_candidates": [
+    {
+      "decision_id": "DEC-PITCH-DELETE-001",
+      "title": "Use RESTRICT on pitch deletion while videos are attached",
+      "qualification": "Hard-to-reverse deletion semantics, surprising without context, and meaningful UX/data trade-offs.",
+      "hard_to_reverse": true,
+      "surprising_without_context": true,
+      "tradeoff_consequences": true,
+      "status": "queued"
+    }
+  ],
+  "readiness_gate": {
+    "core_terms_reconciled": true,
+    "open_decisions": [],
+    "adr_state": "queued",
+    "implementation_slice_bounded": true
+  },
+  "issue_inputs": [
+    {
+      "issue_id": "ADR-ISSUE-010",
+      "title": "Write ADR for pitch deletion restriction",
+      "problem_statement": "Pitch deletion semantics are non-obvious and require explicit decision record.",
+      "scope_in": [
+        "Document RESTRICT vs SET NULL vs CASCADE trade-offs",
+        "Record chosen policy and consequences"
+      ],
+      "scope_out": [
+        "Database schema implementation"
+      ],
+      "acceptance_criteria": [
+        "ADR committed",
+        "Alternatives and consequences included"
+      ],
+      "dependencies": [],
+      "blocked_by": [],
+      "risks": [
+        "Deletion behavior misunderstood by future contributors"
+      ],
+      "docs_to_update": [
+        "CONTEXT.md"
+      ],
+      "test_notes": [
+        "Docs-only change"
+      ],
+      "kind": "adr"
+    },
+    {
+      "issue_id": "IMPL-ISSUE-020",
+      "title": "Implement pitches with manual status and video association",
+      "problem_statement": "Need pitch-first workflow with explicit standalone video association.",
+      "scope_in": [
+        "Create pitch model and status column",
+        "Add nullable pitchId on videos",
+        "Support zero-video pitches"
+      ],
+      "scope_out": [
+        "Automated status derivation from timestamps"
+      ],
+      "acceptance_criteria": [
+        "Pitches can be created before videos",
+        "Manual status transitions allowed",
+        "Deletion blocked when videos remain attached"
+      ],
+      "dependencies": [
+        "ADR-ISSUE-010"
+      ],
+      "blocked_by": [
+        "ADR-ISSUE-010"
+      ],
+      "risks": [
+        "Language drift if docs and code naming diverge"
+      ],
+      "docs_to_update": [
+        "CONTEXT.md",
+        "ARCHITECTURE_REVIEW.md"
+      ],
+      "test_notes": [
+        "Migration tests for pitchId",
+        "Integration test for restricted deletion",
+        "Status transition API tests"
+      ],
+      "kind": "implementation"
+    }
+  ],
+  "architecture_followups": {
+    "review_doc_path": "ARCHITECTURE_REVIEW.md",
+    "cadence": "weekly",
+    "items": [
+      {
+        "summary": "Review coupling between pitch presentation and standalone video query paths",
+        "owner": "platform-team",
+        "due_date": "2026-06-15",
+        "risk_if_delayed": "Query coupling could slow future content packaging evolution"
+      }
+    ]
+  },
+  "allow_deprecated_terms_for_migration": false
+}

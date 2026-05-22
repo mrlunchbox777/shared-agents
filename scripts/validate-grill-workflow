@@ -1,0 +1,303 @@
+#!/usr/bin/env python3
+"""Validate grill-with-docs handoff payloads.
+
+Usage:
+  scripts/validate-grill-workflow <handoff.json>
+"""
+
+from __future__ import annotations
+
+import json
+import re
+import sys
+from pathlib import Path
+
+
+SEMVER_RE = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+$")
+DATE_RE = re.compile(r"^[0-9]{4}-[0-9]{2}-[0-9]{2}$")
+
+ALLOWED_STATUS = {"ready", "needs changes", "blocked"}
+ALLOWED_ADR_STATE = {"none_required", "queued", "recorded"}
+ALLOWED_KIND = {"adr", "implementation"}
+
+
+def add_error(errors: list[dict[str, str]], code: str, path: str, hint: str) -> None:
+    errors.append({"code": code, "path": path, "hint": hint})
+
+
+def load_json(path: Path) -> dict:
+    with path.open("r", encoding="utf-8") as handle:
+        return json.load(handle)
+
+
+def require_fields(obj: dict, fields: list[str], base: str, errors: list[dict[str, str]]) -> None:
+    for field in fields:
+        if field not in obj:
+            add_error(errors, "MISSING_FIELD", f"{base}.{field}", "Add required field")
+
+
+def collect_text_values(node: object) -> list[str]:
+    values: list[str] = []
+    if isinstance(node, dict):
+        for value in node.values():
+            values.extend(collect_text_values(value))
+    elif isinstance(node, list):
+        for item in node:
+            values.extend(collect_text_values(item))
+    elif isinstance(node, str):
+        values.append(node)
+    return values
+
+
+def detect_blocker_cycles(issue_map: dict[str, dict]) -> bool:
+    visited: dict[str, int] = {}
+
+    def dfs(node: str) -> bool:
+        state = visited.get(node, 0)
+        if state == 1:
+            return True
+        if state == 2:
+            return False
+        visited[node] = 1
+        for blocker in issue_map[node].get("blocked_by", []):
+            if blocker in issue_map and dfs(blocker):
+                return True
+        visited[node] = 2
+        return False
+
+    for key in issue_map:
+        if visited.get(key, 0) == 0 and dfs(key):
+            return True
+    return False
+
+
+def validate(payload: dict) -> list[dict[str, str]]:
+    errors: list[dict[str, str]] = []
+
+    top_required = [
+        "schema_version",
+        "status",
+        "language_updates",
+        "adr_candidates",
+        "readiness_gate",
+        "issue_inputs",
+        "architecture_followups",
+    ]
+    require_fields(payload, top_required, "$", errors)
+
+    schema_version = payload.get("schema_version")
+    if not isinstance(schema_version, str) or not SEMVER_RE.match(schema_version):
+        add_error(errors, "INVALID_SEMVER", "$.schema_version", "Use semantic version format X.Y.Z")
+
+    status = payload.get("status")
+    if status not in ALLOWED_STATUS:
+        add_error(errors, "INVALID_STATUS", "$.status", "Use one of: ready, needs changes, blocked")
+
+    language_updates = payload.get("language_updates", {})
+    if isinstance(language_updates, dict):
+        require_fields(language_updates, ["context_doc_path", "added", "changed", "deprecated"], "$.language_updates", errors)
+    else:
+        add_error(errors, "INVALID_TYPE", "$.language_updates", "Must be an object")
+
+    readiness_gate = payload.get("readiness_gate", {})
+    if isinstance(readiness_gate, dict):
+        require_fields(
+            readiness_gate,
+            ["core_terms_reconciled", "open_decisions", "adr_state", "implementation_slice_bounded"],
+            "$.readiness_gate",
+            errors,
+        )
+        if readiness_gate.get("adr_state") not in ALLOWED_ADR_STATE:
+            add_error(errors, "INVALID_ADR_STATE", "$.readiness_gate.adr_state", "Use none_required, queued, or recorded")
+
+        open_decisions = readiness_gate.get("open_decisions", [])
+        if isinstance(open_decisions, list):
+            for idx, decision in enumerate(open_decisions):
+                if not isinstance(decision, dict):
+                    add_error(errors, "INVALID_TYPE", f"$.readiness_gate.open_decisions[{idx}]", "Must be an object")
+                    continue
+                require_fields(decision, ["question", "owner", "due_date", "risk_if_delayed"], f"$.readiness_gate.open_decisions[{idx}]", errors)
+                if "due_date" in decision and not DATE_RE.match(str(decision["due_date"])):
+                    add_error(errors, "INVALID_DATE", f"$.readiness_gate.open_decisions[{idx}].due_date", "Use YYYY-MM-DD")
+        else:
+            add_error(errors, "INVALID_TYPE", "$.readiness_gate.open_decisions", "Must be an array")
+    else:
+        add_error(errors, "INVALID_TYPE", "$.readiness_gate", "Must be an object")
+
+    adr_candidates = payload.get("adr_candidates", [])
+    if isinstance(adr_candidates, list):
+        for idx, candidate in enumerate(adr_candidates):
+            if not isinstance(candidate, dict):
+                add_error(errors, "INVALID_TYPE", f"$.adr_candidates[{idx}]", "Must be an object")
+                continue
+            require_fields(
+                candidate,
+                [
+                    "decision_id",
+                    "title",
+                    "qualification",
+                    "hard_to_reverse",
+                    "surprising_without_context",
+                    "tradeoff_consequences",
+                    "status",
+                ],
+                f"$.adr_candidates[{idx}]",
+                errors,
+            )
+            for flag in ["hard_to_reverse", "surprising_without_context", "tradeoff_consequences"]:
+                if candidate.get(flag) is not True:
+                    add_error(errors, "ADR_THRESHOLD_FAIL", f"$.adr_candidates[{idx}].{flag}", "Must be true for strict ADR threshold")
+    else:
+        add_error(errors, "INVALID_TYPE", "$.adr_candidates", "Must be an array")
+
+    issue_inputs = payload.get("issue_inputs", [])
+    issue_map: dict[str, dict] = {}
+    if isinstance(issue_inputs, list):
+        for idx, issue in enumerate(issue_inputs):
+            base = f"$.issue_inputs[{idx}]"
+            if not isinstance(issue, dict):
+                add_error(errors, "INVALID_TYPE", base, "Must be an object")
+                continue
+            require_fields(
+                issue,
+                [
+                    "issue_id",
+                    "title",
+                    "problem_statement",
+                    "scope_in",
+                    "scope_out",
+                    "acceptance_criteria",
+                    "dependencies",
+                    "blocked_by",
+                    "risks",
+                    "docs_to_update",
+                    "test_notes",
+                    "kind",
+                ],
+                base,
+                errors,
+            )
+            issue_id = issue.get("issue_id")
+            if isinstance(issue_id, str) and issue_id:
+                issue_map[issue_id] = issue
+            if issue.get("kind") not in ALLOWED_KIND:
+                add_error(errors, "INVALID_ISSUE_KIND", f"{base}.kind", "Use adr or implementation")
+
+        for idx, issue in enumerate(issue_inputs):
+            if not isinstance(issue, dict):
+                continue
+            blockers = issue.get("blocked_by", [])
+            if not isinstance(blockers, list):
+                add_error(errors, "INVALID_TYPE", f"$.issue_inputs[{idx}].blocked_by", "Must be an array")
+                continue
+            for blocker in blockers:
+                if blocker not in issue_map:
+                    add_error(
+                        errors,
+                        "UNRESOLVED_BLOCKER",
+                        f"$.issue_inputs[{idx}].blocked_by",
+                        f"Unknown issue_id: {blocker}",
+                    )
+
+        adr_issue_ids = {k for k, v in issue_map.items() if v.get("kind") == "adr"}
+        for idx, issue in enumerate(issue_inputs):
+            if not isinstance(issue, dict):
+                continue
+            if issue.get("kind") == "implementation" and adr_issue_ids and not any(b in adr_issue_ids for b in issue.get("blocked_by", [])):
+                add_error(
+                    errors,
+                    "MISSING_ADR_BLOCKER",
+                    f"$.issue_inputs[{idx}].blocked_by",
+                    "Implementation issue must be blocked by at least one ADR issue",
+                )
+
+        if issue_map and detect_blocker_cycles(issue_map):
+            add_error(errors, "BLOCKER_CYCLE", "$.issue_inputs", "Remove cyclic blocked_by references")
+    else:
+        add_error(errors, "INVALID_TYPE", "$.issue_inputs", "Must be an array")
+
+    architecture = payload.get("architecture_followups", {})
+    if isinstance(architecture, dict):
+        require_fields(architecture, ["review_doc_path", "cadence", "items"], "$.architecture_followups", errors)
+        if architecture.get("review_doc_path") != "ARCHITECTURE_REVIEW.md":
+            add_error(errors, "INVALID_REVIEW_PATH", "$.architecture_followups.review_doc_path", "Must equal ARCHITECTURE_REVIEW.md")
+        items = architecture.get("items", [])
+        if isinstance(items, list):
+            for idx, item in enumerate(items):
+                if not isinstance(item, dict):
+                    add_error(errors, "INVALID_TYPE", f"$.architecture_followups.items[{idx}]", "Must be an object")
+                    continue
+                require_fields(item, ["summary", "owner", "due_date", "risk_if_delayed"], f"$.architecture_followups.items[{idx}]", errors)
+                if "due_date" in item and not DATE_RE.match(str(item["due_date"])):
+                    add_error(errors, "INVALID_DATE", f"$.architecture_followups.items[{idx}].due_date", "Use YYYY-MM-DD")
+        else:
+            add_error(errors, "INVALID_TYPE", "$.architecture_followups.items", "Must be an array")
+    else:
+        add_error(errors, "INVALID_TYPE", "$.architecture_followups", "Must be an object")
+
+    allow_deprecated = bool(payload.get("allow_deprecated_terms_for_migration", False))
+    deprecated_terms = []
+    if isinstance(language_updates, dict) and isinstance(language_updates.get("deprecated"), list):
+        for term in language_updates["deprecated"]:
+            if isinstance(term, dict) and isinstance(term.get("term"), str):
+                deprecated_terms.append(term["term"])
+
+    if deprecated_terms and not allow_deprecated:
+        joined_text = "\n".join(collect_text_values({
+            "issue_inputs": payload.get("issue_inputs", []),
+            "architecture_followups": payload.get("architecture_followups", {}),
+        }))
+        for term in deprecated_terms:
+            if term and term in joined_text:
+                add_error(
+                    errors,
+                    "DEPRECATED_TERM_USED",
+                    "$.issue_inputs|$.architecture_followups",
+                    f"Remove deprecated term '{term}' or set migration override",
+                )
+
+    if status == "ready" and isinstance(readiness_gate, dict):
+        if readiness_gate.get("core_terms_reconciled") is not True:
+            add_error(errors, "READY_GATE_FAIL", "$.readiness_gate.core_terms_reconciled", "Must be true when status=ready")
+        if readiness_gate.get("implementation_slice_bounded") is not True:
+            add_error(errors, "READY_GATE_FAIL", "$.readiness_gate.implementation_slice_bounded", "Must be true when status=ready")
+        if readiness_gate.get("open_decisions"):
+            add_error(errors, "READY_GATE_FAIL", "$.readiness_gate.open_decisions", "Must be empty when status=ready")
+
+    if status == "needs changes" and "closure_checklist" not in payload:
+        add_error(errors, "MISSING_CLOSURE_CHECKLIST", "$.closure_checklist", "Provide closure checklist for needs changes outcomes")
+
+    return errors
+
+
+def main(argv: list[str]) -> int:
+    if len(argv) != 2:
+        print("Usage: scripts/validate-grill-workflow <handoff.json>")
+        return 2
+
+    input_path = Path(argv[1])
+    if not input_path.exists():
+        print(json.dumps([{"code": "FILE_NOT_FOUND", "path": str(input_path), "hint": "Provide an existing JSON file"}], indent=2))
+        return 2
+
+    try:
+        payload = load_json(input_path)
+    except json.JSONDecodeError as exc:
+        print(json.dumps([{"code": "INVALID_JSON", "path": str(input_path), "hint": str(exc)}], indent=2))
+        return 2
+
+    if not isinstance(payload, dict):
+        print(json.dumps([{"code": "INVALID_TYPE", "path": "$", "hint": "Top-level JSON must be an object"}], indent=2))
+        return 1
+
+    errors = validate(payload)
+    if errors:
+        print(json.dumps(errors, indent=2))
+        return 1
+
+    print(json.dumps({"ok": True, "message": "Validation passed"}, indent=2))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv))
