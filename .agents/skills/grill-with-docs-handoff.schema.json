@@ -1,0 +1,190 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shared-agents.local/schemas/grill-with-docs-handoff.schema.json",
+  "title": "Grill With Docs Handoff",
+  "description": "Machine-readable handoff emitted by grill-with-docs style workflows.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "language_updates",
+    "adr_candidates",
+    "readiness_gate",
+    "issue_inputs",
+    "architecture_followups"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "Semantic version. Patch is additive-only; minor is backward-compatible additions; major allows breaking changes."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ready", "needs changes", "blocked"]
+    },
+    "language_updates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["context_doc_path", "added", "changed", "deprecated"],
+      "properties": {
+        "context_doc_path": { "type": "string", "minLength": 1 },
+        "added": { "$ref": "#/$defs/termList" },
+        "changed": { "$ref": "#/$defs/termList" },
+        "deprecated": { "$ref": "#/$defs/termList" }
+      }
+    },
+    "adr_candidates": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/adrCandidate" }
+    },
+    "readiness_gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "core_terms_reconciled",
+        "open_decisions",
+        "adr_state",
+        "implementation_slice_bounded"
+      ],
+      "properties": {
+        "core_terms_reconciled": { "type": "boolean" },
+        "open_decisions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/openDecision" }
+        },
+        "adr_state": {
+          "type": "string",
+          "enum": ["none_required", "queued", "recorded"]
+        },
+        "implementation_slice_bounded": { "type": "boolean" }
+      }
+    },
+    "issue_inputs": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/issueInput" }
+    },
+    "architecture_followups": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["review_doc_path", "cadence", "items"],
+      "properties": {
+        "review_doc_path": {
+          "type": "string",
+          "const": "ARCHITECTURE_REVIEW.md"
+        },
+        "cadence": {
+          "type": "string",
+          "description": "Reminder cadence metadata, for example weekly or biweekly."
+        },
+        "items": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/followupItem" }
+        }
+      }
+    },
+    "allow_deprecated_terms_for_migration": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "$defs": {
+    "termList": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["term", "definition"],
+        "properties": {
+          "term": { "type": "string", "minLength": 1 },
+          "definition": { "type": "string", "minLength": 1 },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "adrCandidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decision_id",
+        "title",
+        "qualification",
+        "hard_to_reverse",
+        "surprising_without_context",
+        "tradeoff_consequences",
+        "status"
+      ],
+      "properties": {
+        "decision_id": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "qualification": { "type": "string", "minLength": 1 },
+        "hard_to_reverse": { "type": "boolean", "const": true },
+        "surprising_without_context": { "type": "boolean", "const": true },
+        "tradeoff_consequences": { "type": "boolean", "const": true },
+        "status": { "type": "string", "enum": ["queued", "recorded"] },
+        "adr_path": { "type": "string" }
+      }
+    },
+    "openDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["question", "owner", "due_date", "risk_if_delayed"],
+      "properties": {
+        "question": { "type": "string", "minLength": 1 },
+        "owner": { "type": "string", "minLength": 1 },
+        "due_date": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        "risk_if_delayed": { "type": "string", "minLength": 1 }
+      }
+    },
+    "issueInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "issue_id",
+        "title",
+        "problem_statement",
+        "scope_in",
+        "scope_out",
+        "acceptance_criteria",
+        "dependencies",
+        "blocked_by",
+        "risks",
+        "docs_to_update",
+        "test_notes",
+        "kind"
+      ],
+      "properties": {
+        "issue_id": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "problem_statement": { "type": "string", "minLength": 1 },
+        "scope_in": { "type": "array", "items": { "type": "string" } },
+        "scope_out": { "type": "array", "items": { "type": "string" } },
+        "acceptance_criteria": { "type": "array", "items": { "type": "string" } },
+        "dependencies": { "type": "array", "items": { "type": "string" } },
+        "blocked_by": { "type": "array", "items": { "type": "string" } },
+        "risks": { "type": "array", "items": { "type": "string" } },
+        "docs_to_update": { "type": "array", "items": { "type": "string" } },
+        "test_notes": { "type": "array", "items": { "type": "string" } },
+        "kind": { "type": "string", "enum": ["adr", "implementation"] }
+      }
+    },
+    "followupItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary", "owner", "due_date", "risk_if_delayed"],
+      "properties": {
+        "summary": { "type": "string", "minLength": 1 },
+        "owner": { "type": "string", "minLength": 1 },
+        "due_date": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        "risk_if_delayed": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}
