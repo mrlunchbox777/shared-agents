@@ -125,6 +125,8 @@ Configuration flow requirements:
    - `plugin`
    - `lsp`, `formatter`, `autoupdate`, `share`, `logLevel`
 3. For each block:
+   - Include a brief one-line description of what the setting controls.
+   - Include a docs reference link for that setting (or schema anchor guidance when no stable docs anchor exists).
    - Offer practical options (unset, enable/disable, add entry, keep current).
    - Provide a recommended default and at least one concrete example when option space is large.
 4. Merge updates conservatively; do not delete unrelated existing keys.
@@ -189,6 +191,28 @@ Ask blocks in this order. Ask one question at a time. For each block, show curre
    - Options: `keep current`, `unset`, `DEBUG`, `INFO`, `WARN`, `ERROR`.
 
 After final block, present full proposed JSON and request write confirmation.
+
+### 4b) Setting quick reference (use during prompts)
+
+When asking each block question, include a short description and one reference link.
+
+- `model`: primary model for most responses. Reference: `https://opencode.ai/docs/models`
+- `small_model`: lower-cost model for lightweight tasks. Reference: `https://opencode.ai/docs/models`
+- `default_agent`: default primary agent when none selected. Reference: `https://opencode.ai/docs/agents`
+- `instructions`: extra instruction files/patterns to include. Reference: `https://opencode.ai/config.json`
+- `skills.paths`: additional local skill directories. Reference: `https://opencode.ai/docs/skills`
+- `provider`: custom provider/model wiring and credentials. Reference: `https://opencode.ai/docs/providers`
+- `mcp`: Model Context Protocol servers. Reference: `https://opencode.ai/docs/mcp-servers`
+- `permission`: tool permission policy. Reference: `https://opencode.ai/docs/permissions`
+- `permission.bash`: bash tool safety policy. Reference: `https://opencode.ai/docs/permissions`
+- `plugin`: plugin modules/extensions. Reference: `https://opencode.ai/docs/plugins`
+- `lsp`: language server integrations. Reference: `https://opencode.ai/config.json`
+- `formatter`: formatter enablement/overrides. Reference: `https://opencode.ai/config.json`
+- `autoupdate`: update behavior (`true`/`false`/`notify`). Reference: `https://opencode.ai/config.json`
+- `share`: session sharing policy (`manual`/`auto`/`disabled`). Reference: `https://opencode.ai/config.json`
+- `logLevel`: runtime log verbosity. Reference: `https://opencode.ai/config.json`
+
+If a docs URL is unavailable or uncertain, use `https://opencode.ai/config.json` as authoritative source.
 
 ### 5) Bash permission hardening (mandatory)
 

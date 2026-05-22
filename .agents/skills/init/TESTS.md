@@ -128,6 +128,8 @@ Expected behavior:
 
 - One question at a time.
 - Shows current value or `unset`.
+- Includes a brief one-line description of what the setting controls.
+- Includes a docs reference link for that setting (or `https://opencode.ai/config.json`).
 - Offers recommended default and practical options.
 
 ### T7: Triple confirmation for risky bash permission
