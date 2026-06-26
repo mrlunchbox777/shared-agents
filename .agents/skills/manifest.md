@@ -10,5 +10,5 @@ This file tracks reusable skills available in this repository.
 - [`ubiquitous-language`](.agents/skills/ubiquitous-language/SKILL.md): refine shared domain terms, update `CONTEXT.md`, and enforce terminology deltas/deprecations.
 - [`adr-writer`](.agents/skills/adr-writer/SKILL.md): record strict-threshold architecture decisions and prepare blocker-safe ADR issue linkage.
 - [`to-issues`](.agents/skills/to-issues/SKILL.md): convert `ready` grilling outcomes into dependency-linked implementation issues.
-- [`plan-and-execute`](.agents/skills/plan-and-execute.md): uses OpenAI GPT 5.5 for high-reason/planning and a local model (Gemma 4) for execution of structured tasks.
+- [`plan-and-execute`](.agents/skills/plan-and-execute/SKILL.md): uses interactive primary-session planning followed by structured checklist execution for complex software tasks.
 - [`improve-codebase-architecture`](.agents/skills/improve-codebase-architecture/SKILL.md): run risk-triggered architecture follow-ups and maintain `ARCHITECTURE_REVIEW.md` cadence metadata.
