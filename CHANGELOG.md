@@ -17,6 +17,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Added fixture harness at `scripts/run-grill-workflow-tests` and test target `make test-grill-workflow`.
 - Added skill-level test documentation at `.agents/skills/grill-with-docs/TESTS.md`.
 - Added GitHub Actions workflow `.github/workflows/grill-workflow-tests.yaml` to run grill workflow fixture tests on push/PR.
+- Added `plan-and-execute` skill for primary-session planning followed by structured checklist execution.
+- Added `skill-creator` skill for probing, researching, recommending, and implementing reusable agent skills.
 
 ### Changed
 

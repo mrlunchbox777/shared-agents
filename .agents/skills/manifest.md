@@ -12,3 +12,4 @@ This file tracks reusable skills available in this repository.
 - [`to-issues`](.agents/skills/to-issues/SKILL.md): convert `ready` grilling outcomes into dependency-linked implementation issues.
 - [`plan-and-execute`](.agents/skills/plan-and-execute/SKILL.md): uses interactive primary-session planning followed by structured checklist execution for complex software tasks.
 - [`improve-codebase-architecture`](.agents/skills/improve-codebase-architecture/SKILL.md): run risk-triggered architecture follow-ups and maintain `ARCHITECTURE_REVIEW.md` cadence metadata.
+- [`skill-creator`](.agents/skills/skill-creator/SKILL.md): probe, research, recommend, and execute creation or improvement of reusable agent skills.
