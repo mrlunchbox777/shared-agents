@@ -13,3 +13,6 @@ This file tracks reusable skills available in this repository.
 - [`plan-and-execute`](.agents/skills/plan-and-execute/SKILL.md): uses interactive primary-session planning followed by structured checklist execution for complex software tasks.
 - [`improve-codebase-architecture`](.agents/skills/improve-codebase-architecture/SKILL.md): run risk-triggered architecture follow-ups and maintain `ARCHITECTURE_REVIEW.md` cadence metadata.
 - [`skill-creator`](.agents/skills/skill-creator/SKILL.md): probe, research, recommend, and execute creation or improvement of reusable agent skills.
+- [`skill-validator`](.agents/skills/skill-validator/SKILL.md): validate skill structure, frontmatter, required sections, references, and manifest registration.
+- [`skill-evaluator`](.agents/skills/skill-evaluator/SKILL.md): evaluate skill trigger behavior and executable validation hooks with pass/fail reports.
+- [`skill-auditor`](.agents/skills/skill-auditor/SKILL.md): map skill capabilities, detect overlap, and recommend consolidation or scope changes.
