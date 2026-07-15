@@ -7,6 +7,7 @@ Use this directory to keep reusable instructions and skills that can be referenc
 - `instructions.md`: shared behavior and operating guidance
 - `skills/manifest.md`: catalog of available shared skills
 - `skills/<name>/SKILL.md`: skill definitions
+- `skills/<name>/scripts/`: optional skill-owned automation
 - `skills/_template/SKILL.md`: starter template for new skills
 
 ## Usage

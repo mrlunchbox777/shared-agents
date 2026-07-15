@@ -63,3 +63,4 @@ The hand-off must strictly adhere to this structure:
 - Confirm no Planner sub-agent was used.
 - Verify that the final plan is a Markdown checklist.
 - Ensure the executor correctly identifies and processes each item in the list.
+- For regression checks after editing checklist parsing behavior, run `.agents/skills/plan-and-execute/scripts/test-plan-parsing.py`.

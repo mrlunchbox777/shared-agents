@@ -21,14 +21,28 @@ description: Use to validate agent skill structure, frontmatter, path/name consi
 
 ## Workflow
 
-1. Discover candidate `SKILL.md` files under the requested skill roots.
-2. Verify each skill file starts with YAML frontmatter containing `name` and `description`.
-3. Confirm `name` matches `^[a-z0-9]+(-[a-z0-9]+)*$`, is 1-64 characters, and matches the containing directory name.
-4. Confirm `description` is 1-1024 characters and specific enough to guide activation.
-5. Check required body sections for the local convention, at minimum `When to use` plus either `Workflow`, `Validation`, or an equivalent action section.
-6. Audit relative links and referenced local files from each `SKILL.md`; report missing targets without modifying unrelated files.
-7. Confirm manifest/index entries exist when the repository uses a manifest.
-8. Produce a pass/fail report grouped by skill, with exact file paths and line references where possible.
+1. Run the deterministic validator first when working in this repository:
+
+```bash
+bash skills.sh validate
+```
+
+2. If validating a non-default skill root or manifest, pass them explicitly:
+
+```bash
+bash skills.sh validate .agents/skills .agents/skills/manifest.md
+```
+
+3. Review the script output for frontmatter, name format, directory/name consistency, description length, required sections, broken local Markdown links, and manifest registration.
+4. Manually inspect any judgment-based concerns the script cannot prove, such as whether the description is specific enough or trigger scope is too broad.
+5. Produce a pass/fail report grouped by skill, with exact file paths and line references where possible.
+
+## Script coverage
+
+- Script path: `.agents/skills/skill-validator/scripts/validate-skills.sh`.
+- Repo entrypoint: `skills.sh validate`.
+- Deterministic checks: `SKILL.md` discovery, YAML frontmatter presence, required `name` and `description`, name regex, directory/name match, description length, required action sections, local Markdown links, and manifest entries.
+- Manual checks: activation specificity, ambiguous trigger wording, and whether missing sections are justified by an unusual skill shape.
 
 ## Validation
 

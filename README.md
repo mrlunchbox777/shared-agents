@@ -11,6 +11,8 @@ Shared AGENTS.md configuration, instruction scaffolding, and reusable skills for
 - `.agents/instructions.md`: cross-project operating defaults
 - `.agents/skills/manifest.md`: shared skills catalog
 - `.agents/skills/_template/SKILL.md`: starter template for new skills
+- `.agents/skills/<name>/scripts/`: optional skill-owned automation
+- `skills.sh`: repo-level helper for skill ecosystem commands, such as `bash skills.sh validate`
 
 ## Global Configuration
 
