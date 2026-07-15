@@ -11,3 +11,15 @@ Shared AGENTS.md configuration, instruction scaffolding, and reusable skills for
 - `.agents/instructions.md`: cross-project operating defaults
 - `.agents/skills/manifest.md`: shared skills catalog
 - `.agents/skills/_template/SKILL.md`: starter template for new skills
+
+## Global Configuration
+
+To use these skills in your local `opencode` instance, ensure your `~/.config/opencode/opencode.json` is configured to include the path to this repository's skills directory:
+
+```json
+{
+  "skills": {
+    "paths": ["/path/to/shared-agents/.agents/skills"]
+  }
+}
+```

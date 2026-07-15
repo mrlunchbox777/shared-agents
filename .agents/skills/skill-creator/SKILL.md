@@ -52,6 +52,7 @@ Before recommending an implementation, inspect the relevant local files:
 - Existing skills: `.agents/skills/*/SKILL.md`, `.opencode/skills/*/SKILL.md`, `.claude/skills/*/SKILL.md`.
 - Local manifest or index files, such as `.agents/skills/manifest.md` and `.agents/README.md`.
 - Nearby agent instructions, such as `AGENTS.md` and `.agents/instructions.md`.
+- Local skill source scripts, such as `skills.sh`, when present.
 - Existing tests, scripts, schemas, or examples for similar skills.
 
 Summarize the local pattern in one or two sentences before proposing changes.
@@ -64,7 +65,8 @@ Recommended sources:
 
 - Anthropic/Claude Code skills docs and example repositories for progressive disclosure, invocation control, supporting files, and eval guidance.
 - OpenAI Codex skills docs and `openai/skills` examples for concise descriptions, local discovery, plugin distribution, and record/replay patterns.
-- `agentskills.io` specification and skill-creation guides for portable `SKILL.md` constraints.
+- [`agentskills.io`](https://agentskills.io) specification and skill-creation guides for portable `SKILL.md` constraints.
+- [`cursor-team-kit/skills`](https://github.com/cursor/plugins/tree/main/cursor-team-kit/skills) for advanced developer workflow patterns.
 - opencode skills docs for frontmatter constraints, discovery paths, and permission behavior.
 - `agents.md` and high-quality public `AGENTS.md` examples for instruction scoping, nested overrides, and agent-facing repo guidance.
 - User-named sources, for example Matt Pocock repos, blog posts, or course materials, when the requested skill concerns TypeScript, teaching style, or a specific upstream pattern.
